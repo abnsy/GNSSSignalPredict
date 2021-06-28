@@ -2,7 +2,7 @@
 ## Installation
 
 
-
+run 
 ```bash
-proccseinggnss.py
+python3 proccseinggnss.py
 ```
