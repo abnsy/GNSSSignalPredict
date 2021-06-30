@@ -57,4 +57,4 @@ for ii in range ( N ) :
 
 fix_df [ 'seconds of week [s]' ] = time_gps [ : , 1 ]
 
-fix_df.to_csv ( './data/android_fix_1.csv' )
+fix_df.to_csv ( '' )
