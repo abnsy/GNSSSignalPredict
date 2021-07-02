@@ -99,8 +99,7 @@ class EKF():
                           [np.cos(theta_lat)*np.cos(theta_long),
                           np.cos(theta_lat)*np.sin(theta_long),
                           np.sin(theta_lat)]])
-        x_ENU = np.dot(T_enu,(x_ECEF-x_REF))
-        return x_ENU
+        return np.dot(T_enu,(x_ECEF-x_REF))
 
     def check_data(self,xref,lat0,lon0,plot_it = False):
 
@@ -119,11 +118,10 @@ class EKF():
                 sv_subset = self.sat_df[self.sat_df['SV'] == sv]
                 subset_time = sv_subset['seconds of week [s]'].to_numpy()
                 subset_angle = sv_subset['elevation_angle'].to_numpy()
-                if True:
-                    plt.plot(subset_time,subset_angle,label=sv)
-                    plt.ylabel('Elevation Angle [degrees]')
-                    plt.legend()
-                    plt.title("Elevation Angle vs. Time")
+                plt.plot(subset_time,subset_angle,label=sv)
+                plt.ylabel('Elevation Angle [degrees]')
+                plt.legend()
+                plt.title("Elevation Angle vs. Time")
             plt.legend()
             plt.show()
 
@@ -282,31 +280,10 @@ class EKF():
     def plot(self,alt=np.array([None])):
         fig, ax = plt.subplots()
         ax.ticklabel_format(useOffset=False)
-        plt.subplot(141)
-        plt.plot(self.times,self.mu_history[0,:])
-        plt.title("X vs Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("X [m]")
-
-        plt.subplot(142)
-        plt.plot(self.times,self.mu_history[1,:])
-        plt.title("Y vs Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("Y [m]")
-
-        plt.subplot(143)
-        plt.plot(self.times,self.mu_history[2,:])
-        plt.title("Z vs Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("Z [m]")
-
-        plt.subplot(144)
-        plt.plot(self.times,self.mu_history[3,:])
-        plt.title("Time Bias vs Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("Time Bias [m]")
-
-
+        self._extracted_from_plot_4(141, 0, "X vs Time", "X [m]")
+        self._extracted_from_plot_4(142, 1, "Y vs Time", "Y [m]")
+        self._extracted_from_plot_4(143, 2, "Z vs Time", "Z [m]")
+        self._extracted_from_plot_4(144, 3, "Time Bias vs Time", "Time Bias [m]")
         plt.figure()
         plt.title("Trace of Covariance Matrix vs. Time")
         plt.xlabel("Time [hrs]")
@@ -315,7 +292,7 @@ class EKF():
 
 
         lla_traj = np.zeros((len(self.times),3))
-        if alt.all() == None:
+        if alt.all() is None:
             lon, lat, alt = pyproj.transform(self.ecef, self.lla, self.mu_history[0,:], self.mu_history[1,:], self.mu_history[2,:], radians=False)
         else:
             lon, lat, reject = pyproj.transform(self.ecef, self.lla, self.mu_history[0,:], self.mu_history[1,:], self.mu_history[2,:], radians=False)
@@ -381,15 +358,11 @@ class EKF():
             plt.ylabel("Latitude Error [degrees latitude]")
             plt.xlabel("Time Step")
             plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
-            plt.plot(steps,lat_error)
-            plt.subplot(132)
-            plt.xlabel("Time Step")
+            self._extracted_from_plot_82(steps, lat_error, 132)
             plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
             plt.title("Longitude Error [degrees longitude]")
             plt.ylabel("Longitude Error [degrees longitude]")
-            plt.plot(steps,lon_error)
-            plt.subplot(133)
-            plt.xlabel("Time Step")
+            self._extracted_from_plot_82(steps, lon_error, 133)
             plt.title("Altitude Error [m]")
             plt.ylabel("Altitude Error [m]")
             plt.plot(steps,h_error)
@@ -402,6 +375,18 @@ class EKF():
         df_traj.to_csv('./data/calculated_trajectory.csv',index=False)
 
         plt.show()
+
+    def _extracted_from_plot_82(self, steps, arg1, arg2):
+        plt.plot(steps, arg1)
+        plt.subplot(arg2)
+        plt.xlabel("Time Step")
+
+    def _extracted_from_plot_4(self, arg0, arg1, arg2, arg3):
+        plt.subplot(arg0)
+        plt.plot(self.times, self.mu_history[arg1,self])
+        plt.title(arg2)
+        plt.xlabel("Time [hrs]")
+        plt.ylabel(arg3)
 
 class EKF_H(EKF):
 
@@ -514,19 +499,19 @@ class EKF_H(EKF):
     def plot(self):
 
         plt.figure()
-        plt.title("Trace of Covariance Matrix vs. Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("Trace")
+        self._extracted_from_plot_4("Trace of Covariance Matrix vs. Time", "Trace")
         plt.plot(self.times,self.P_history)
 
         fig, ax = plt.subplots()
         ax.ticklabel_format(useOffset=False)
         plt.plot(self.times,self.mu_history[0,:])
-        plt.title("h vs Time")
-        plt.xlabel("Time [hrs]")
-        plt.ylabel("h [m]")
-
+        self._extracted_from_plot_4("h vs Time", "h [m]")
         plt.show()
+
+    def _extracted_from_plot_4(self, arg0, arg1):
+        plt.title(arg0)
+        plt.xlabel("Time [hrs]")
+        plt.ylabel(arg1)
 
 if __name__ == '__main__':
 
